@@ -1,0 +1,4 @@
+name = registration
+description = Course registration module.
+package = custom-modules
+core = 7.x

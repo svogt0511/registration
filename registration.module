@@ -1,0 +1,648 @@
+<?php
+
+/**
+ * @file
+ * Module file for registration module.
+ */
+
+$course_title = "Theory of Computing 2: Electric Boogaloo";
+
+/**
+ * DATABASE FUNCTIONS.
+ */
+
+/**
+ * Save an entry in the database.
+ *
+ * The underlying function is db_insert().
+ *
+ * Exception handling is shown in this example. It could be simplified
+ * without the try/catch blocks, but since an insert will throw an exception
+ * and terminate your application if the exception is not handled, it is best
+ * to employ try/catch.
+ *
+ * @param array $entry
+ *   An array containing all the fields of the database record.
+ *
+ * @see db_insert()
+ */
+function registration_entry_insert(array $entry) {
+  $return_value = NULL;
+  try {
+    $return_value = db_insert('registration')
+      ->fields($entry)
+      ->execute();
+  }
+  catch (Exception $e) {
+    drupal_set_message(t('db_insert failed. Message = %message, query= %query',
+      array('%message' => $e->getMessage(), '%query' => $e->query_string)),
+      'error');
+  }
+  return $return_value;
+}
+
+/**
+ * Update an entry in the database.
+ *
+ * @param array $entry
+ *   An array containing all the fields of the item to be updated.
+ *
+ * @see db_update()
+ */
+function registration_entry_update(array $entry) {
+  try {
+    // db_update()...->execute() returns the number of rows updated.
+    $count = db_update('registration')
+      ->fields($entry)
+      ->condition('pid', $entry['pid'])
+      ->execute();
+  }
+  catch (Exception $e) {
+    drupal_set_message(t('db_update failed. Message = %message, query= %query',
+      array('%message' => $e->getMessage(), '%query' => $e->query_string)),
+      'error');
+  }
+  return $count;
+}
+
+/**
+ * Delete an entry from the database.
+ *
+ * @param array $entry
+ *   An array containing at least the person identifier 'pid' element of the
+ *   entry to delete.
+ *
+ * @see db_delete()
+ */
+function registration_entry_delete(array $entry) {
+  db_delete('registration')
+    ->condition('pid', $entry['pid'])
+    ->execute();
+}
+
+/**
+ * Read from the database using a filter array.
+ *
+ * @param array $entry
+ *   An array containing all the fields used to search the entries in the table.
+ *
+ * @return object
+ *   An object containing the loaded entries if found.
+ *
+ * @see db_select()
+ */
+function registration_entry_load(array $entry = array()) {
+  // Read all fields from the registration table.
+  $select = db_select('registration', 'reg');
+  $select->fields('reg');
+
+  // Add each field and value as a condition to this query.
+  foreach ($entry as $field => $value) {
+    $select->condition($field, $value);
+  }
+  // Return the result in object format.
+  return $select->execute()->fetchAll();
+}
+
+/**
+ * Select only certain fields from the database.
+ *
+ * As with any database query we should only bring in the data we need.
+ * This gives us the field method that expects the table name followed by an
+ * array of the fields we want, in this case the table 'registration' and
+ * the fields name and age.
+ */
+function registration_selective_list() {
+  $output = '';
+  // Bring in two fields from the registration table for the uid 1.
+  $select = db_select('registration')
+    ->fields('registration', array('name', 'age'))
+    ->condition('uid', 1)
+    ->execute();
+  $rows = array();
+  foreach ($select as $entry) {
+    // Sanitize the data before handing it off to the theme layer.
+    $rows[] = array_map('check_plain', (array) $entry);
+    // Make a table for them.
+    $header = array(t('Name'), t('Age'));
+    $output .= theme('table', array('header' => $header, 'rows' => $rows));
+  }
+  return $output;
+}
+
+/**
+ * Render a filtered list of entries in the database.
+ *
+ * This also helps processing queries that return several rows, providing the
+ * found objects in the same query execution call.
+ *
+ * This function queries the database using a JOIN between users table and the
+ * example entries, to provide the username that created the entry, and creates
+ * a table with the results, processing each row.
+ *
+ * SELECT
+ *  e.pid as pid, e.name as name, e.surname as surname, e.age as age
+ *  u.name as username
+ * FROM
+ *  {registration} e
+ * JOIN
+ *  users u ON e.uid = u.uid
+ * WHERE
+ *  e.name = 'John' AND e.age > 18
+ *
+ * @see db_select()
+ * @see http://drupal.org/node/310075
+ */
+function registration_advanced_list() {
+  $output = '';
+
+  $select = db_select('registration', 'e');
+  // Join the users table, so we can get the entry creator's username.
+  $select->join('users', 'u', 'e.uid = u.uid');
+  // Select these specific fields for the output.
+  $select->addField('e', 'pid');
+  $select->addField('u', 'name', 'username');
+  $select->addField('e', 'name');
+  $select->addField('e', 'surname');
+  $select->addField('e', 'age');
+  // Filter only persons named "John".
+  $select->condition('e.name', 'John');
+  // Filter only persons older than 18 years.
+  $select->condition('e.age', 18, '>');
+  // Make sure we only get items 0-49, for scalability reasons.
+  $select->range(0, 50);
+
+  // Now, loop all these entries and show them in a table. Note that there is no
+  // db_fetch_* object or array function being called here. Also note that the
+  // following line could have been written as
+  // $entries = $select->execute()->fetchAll() which would return each selected
+  // record as an object instead of an array.
+  $entries = $select->execute()->fetchAll(PDO::FETCH_ASSOC);
+  if (!empty($entries)) {
+    $rows = array();
+    foreach ($entries as $entry) {
+      // Sanitize the data before handing it off to the theme layer.
+      $rows[] = array_map('check_plain', $entry);
+    }
+    // Make a table for them.
+    $header = array(t('Id'), t('Created by'), t('Name'),
+      t('Surname'), t('Age'),
+    );
+    $output .= theme('table', array('header' => $header, 'rows' => $rows));
+  }
+  else {
+    drupal_set_message(t('No entries meet the filter criteria (Name = "John" and Age > 18).'));
+  }
+  return $output;
+}
+
+/**
+ * HELP FUNCTIONS.
+ */
+
+/**
+ * Implements hook_help().
+ *
+ * Show some help on each form provided by this module.
+ */
+function registration_help($path) {
+  $output = '';
+  switch ($path) {
+    case 'registration':
+      $output = t('Generate a list of all entries in the registration table.');
+      break;
+
+    case 'registration/add':
+      $output = t('Add an entry to the registration table table.');
+      break;
+  }
+  return $output;
+}
+
+/**
+ * MENU/FORM FUNCTIONS.
+ */
+
+/**
+ * Implements hook_menu().
+ *
+ * Set up calls to drupal_get_form() for all our example cases.
+ */
+function registration_menu() {
+  $items = array();
+
+  $items['registration'] = array(
+    'title' => 'Registration List',
+    'page callback' => 'registration_list',
+    // 'access callback' => TRUE,
+    'access arguments' => array('register for course'),
+  );
+  $items['registration/list'] = array(
+    'title' => 'List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['registration/add'] = array(
+    'title' => 'Add entry',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('registration_form_add'),
+    // 'access callback' => TRUE,
+    'access arguments' => array('register for course'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => -4,
+  );
+
+  return $items;
+}
+
+/**
+ * Render a list of entries in the database.
+ */
+function registration_list() {
+  $output = '';
+
+  // Get all entries in the registration table.
+  if ($entries = registration_entry_load()) {
+    $rows = array();
+    foreach ($entries as $entry) {
+      // Sanitize the data before handing it off to the theme layer.
+      $rows[] = array_map('check_plain', (array) $entry);
+    }
+    // Make a table for them.
+    $header = array(t('Id'), t('uid'), t('Name'), t('Surname'), t('Age'));
+
+    $output .= theme('table', array('header' => $header, 'rows' => $rows));
+  }
+  else {
+    drupal_set_message(t('No entries have been added yet.'));
+  }
+  return $output;
+}
+
+/**
+ * Prepare a simple form to add an entry, with all the interesting fields.
+ */
+function registration_form_add($form, &$form_state) {
+  $form = array();
+
+  $form['add'] = array(
+    '#type'  => 'fieldset',
+    '#title' => t('Add a person entry'),
+  );
+  $form['add']['name'] = array(
+    '#type'  => 'textfield',
+    '#title' => t('Name'),
+    '#size'  => 15,
+  );
+  $form['add']['surname'] = array(
+    '#type'  => 'textfield',
+    '#title' => t('Surname'),
+    '#size'  => 15,
+  );
+  $form['add']['age'] = array(
+    '#type'  => 'textfield',
+    '#title' => t('Age'),
+    '#size'  => 5,
+    '#description' => t("Values greater than 127 will cause an exception. Try it - it's a great example why exception handling is needed with DTBNG."),
+  );
+  $form['add']['submit'] = array(
+    '#type'  => 'submit',
+    '#value' => t('Add'),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for 'add entry' form.
+ */
+function registration_form_add_submit($form, &$form_state) {
+  global $user;
+
+  // Save the submitted entry.
+  $entry = array(
+    'name'    => $form_state['values']['name'],
+    'surname' => $form_state['values']['surname'],
+    'age'     => $form_state['values']['age'],
+    'uid'     => $user->uid,
+  );
+  $return = registration_entry_insert($entry);
+  if ($return) {
+    drupal_set_message(t("Created entry @entry",
+      array('@entry' => print_r($entry, TRUE)))
+    );
+  }
+}
+
+/**
+ * UI to update a record.
+ */
+function registration_form_update($form, &$form_state) {
+  $form = array(
+    '#prefix' => '<div id="updateform">',
+    '#suffix' => '</div>',
+  );
+
+  $entries = registration_entry_load();
+  $keyed_entries = array();
+  if (empty($entries)) {
+    $form['no_values'] = array(
+      '#value' => t("No entries exist in the table registration table."),
+    );
+    return $form;
+  }
+
+  foreach ($entries as $entry) {
+    $options[$entry->pid] = t("@pid: @name @surname (@age)",
+      array(
+        '@pid' => $entry->pid,
+        '@name' => $entry->name,
+        '@surname' => $entry->surname,
+        '@age' => $entry->age,
+      )
+    );
+    $keyed_entries[$entry->pid] = $entry;
+  }
+  $default_entry = !empty($form_state['values']['pid']) ? $keyed_entries[$form_state['values']['pid']] : $entries[0];
+
+  $form_state['entries'] = $keyed_entries;
+
+  $form['pid'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#title' => t('Choose entry to update'),
+    '#default_value' => $default_entry->pid,
+    '#ajax' => array(
+      'wrapper' => 'updateform',
+      'callback' => 'registration_form_update_callback',
+    ),
+  );
+
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Updated first name'),
+    '#size' => 15,
+    '#default_value' => $default_entry->name,
+  );
+
+  $form['surname'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Updated last name'),
+    '#size' => 15,
+    '#default_value' => $default_entry->surname,
+  );
+  $form['age'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Updated age'),
+    '#size' => 4,
+    '#default_value' => $default_entry->age,
+    '#description' => t("Values greater than 127 will cause an exception"),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update'),
+  );
+  return $form;
+}
+
+/**
+ * AJAX callback handler for the pid select.
+ *
+ * When the pid changes, populates the defaults from the database in the form.
+ */
+function registration_form_update_callback($form, $form_state) {
+  $entry = $form_state['entries'][$form_state['values']['pid']];
+  // Setting the #value of items is the only way I was able to figure out
+  // to get replaced defaults on these items. #default_value will not do it
+  // and shouldn't.
+  foreach (array('name', 'surname', 'age') as $item) {
+    $form[$item]['#value'] = $entry->$item;
+  }
+  return $form;
+}
+
+/**
+ * Submit handler for 'update entry' form.
+ */
+function registration_form_update_submit($form, &$form_state) {
+  global $user;
+
+  // Save the submitted entry.
+  $entry = array(
+    'pid' => $form_state['values']['pid'],
+    'name' => $form_state['values']['name'],
+    'surname' => $form_state['values']['surname'],
+    'age' => $form_state['values']['age'],
+    'uid' => $user->uid,
+  );
+  $count = registration_entry_update($entry);
+  drupal_set_message(t("Updated entry @entry (@count row updated)",
+    array('@count' => $count, '@entry' => print_r($entry, TRUE))));
+}
+
+/**
+ * Groups result set by the specified field.  Renders the return set.
+ *
+ * This function groups the result set by the specified field and render a
+ * list of entries in the database.
+ */
+function registration_grouping_list() {
+  $result = registration_execute_group_by_select_query();
+  return registration_render_resultset_as_table($result);
+}
+
+/**
+ * Queries the database.
+ *
+ * The code below will result in the following query
+ * SELECT ex.pid AS pid, ex.uid AS uid, ex.name AS name, ex.surname AS surname,
+ * ex.age AS age FROM {dbtng_example} ex GROUP BY ex.age.
+ */
+function registration_execute_group_by_select_query() {
+  $select = db_select('registration', 'ex');
+  // Select these specific fields for the output.
+  $select->fields('ex', array('name'));
+  // Count('name') how many times same name comes in table .
+  $select->addExpression('COUNT(ex.name)', 'count');
+  // 'n.name' is used for groupBy clause.
+  $select->groupBy("ex.name");
+  $output = $select->execute()->fetchAll();
+  return $output;
+}
+
+/**
+ * This function renders a resultset as table.
+ */
+function registration_render_resultset_as_table($result) {
+  $rows = array();
+  if ($result) {
+    foreach ($result as $row) {
+      // Sanitize the data before handing it off to the theme layer.
+      $rows[] = array_map('check_plain', (array) $row);
+    }
+  }
+  return registration_convert_resultset_to_table_render_array($rows);
+}
+
+/**
+ * This function renders array for table 'dbtng_example'.
+ */
+function registration_convert_resultset_to_table_render_array($rows = array()) {
+  $header = array(t('Name'), t('Count'));
+  $output = theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => t('No records found'),
+  ),
+  );
+  return $output;
+}
+
+/**
+ * REGISTRATION MODULE - BLOCKS.
+ */
+
+/**
+ * Implements hook_block_info().
+ *
+ * This hook declares what blocks are provided by the module.
+ */
+function registration_block_info() {
+  // This hook returns an array, each component of which is an array of block
+  // information. The array keys are the 'delta' values used in other block
+  // hooks.
+  //
+  // The required block information is a block description, which is shown
+  // to the site administrator in the list of possible blocks. You can also
+  // provide initial settings for block weight, status, etc.
+  //
+  // Many options are defined in hook_block_info():
+  $blocks['example_configurable_text'] = array(
+    // info: The name of the block.
+    'info' => t('Registration Block'),
+    // Block caching options (per role, per user, etc.)
+    // DRUPAL_CACHE_PER_ROLE is the default.
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_configure().
+ *
+ * This hook declares configuration options for blocks provided by this module.
+ */
+function registration_block_configure($delta = '') {
+  $form = array();
+  // The $delta parameter tells us which block is being configured.
+  // In this example, we'll allow the administrator to customize
+  // the text of the 'configurable text string' block defined in this module.
+  if ($delta == 'example_configurable_text') {
+    // All we need to provide is the specific configuration options for our
+    // block. Drupal will take care of the standard block configuration options
+    // (block title, page visibility, etc.) and the save button.
+    $form['registration_block_string'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Block contents'),
+      '#size' => 60,
+      '#description' => t('This text will appear in the example block.'),
+      '#default_value' => variable_get('registration_block_string', t('Some example content.')),
+    );
+  }
+  return $form;
+}
+
+/**
+ * Implements hook_block_save().
+ *
+ * This hook declares how the configured options for a block
+ * provided by this module are saved.
+ */
+function registration_block_save($delta = '', $edit = array()) {
+  // We need to save settings from the configuration form.
+  // We need to check $delta to make sure we are saving the right block.
+  if ($delta == 'example_configurable_text') {
+    // Have Drupal save the string to the database.
+    variable_set('registration_block_string', $edit['registration_block_string']);
+  }
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook declares how the configured options for a block
+ * provided by this module are saved.
+ */
+function registration_block_view($delta = '') {
+  // The $delta parameter tells us which block is being requested.
+  switch ($delta) {
+    case 'example_configurable_text':
+      // The subject is displayed at the top of the block. Note that it
+      // should be passed through t() for translation. The title configured
+      // for the block using Drupal UI supercedes this one.
+      $block['subject'] = t('Number of Students Registered:');
+      // The content of the block is typically generated by calling a custom
+      // function.
+      $block['content'] = registration_contents($delta);
+      break;
+  }
+  return $block;
+}
+
+/**
+ * A block content function - displays the number of students registered.
+ */
+function registration_contents($which_block) {
+  switch ($which_block) {
+    case 'example_configurable_text':
+      // Modules would typically perform some database queries to fetch the
+      // content for their blocks. Here, we'll just use the variable set in the
+      // block configuration or, if none has set, a default value.
+      // Block content can be returned in two formats: renderable arrays
+      // (as here) are preferred though a simple string will work as well.
+      // Block content created through the UI defaults to a string.
+      $query = db_select('registration');
+      $num_rows = $query->countQuery()->execute()->fetchField();
+      $result = array(
+        '#markup' => $num_rows,
+        /*
+        '#markup' => variable_get('registration_block_string',
+          t('A default value. This block was created at %time',
+            array('%time' => date('c'))
+          )
+        ),
+        */
+      );
+      return $result;
+  }
+}
+
+/**
+ * Make changes to the block view.
+ */
+function registration_block_view_alter(&$data, $block) {
+  // We'll search for the string 'uppercase'.
+  if ((!empty($block->title) && stristr($block->title, 'uppercase')) || (!empty($data['subject']) && stristr($data['subject'], 'uppercase'))) {
+    // This will uppercase the default title.
+    $data['subject'] = isset($data['subject']) ? drupal_strtoupper($data['subject']) : '';
+    // This will uppercase a title set in the UI.
+    $block->title = isset($block->title) ? drupal_strtoupper($block->title) : '';
+  }
+}
+
+/**
+ * Implements hook_permission().
+ *
+ * In this case we're adding an additional permission for 'authenticated users'
+ * to access the registration page.
+ */
+function registration_permission() {
+  return array(
+    'register for course' => array(
+      'title' => t('Register For Course'),
+      'description' => t('Sign myself up for a course.'),
+    ),
+  );
+}
