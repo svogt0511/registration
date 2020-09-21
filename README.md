@@ -3,7 +3,7 @@ Drupal 7 custom 'registration' module for the dgi coding test.
 
 Coding test as described in the [dgi Coding Test](https://gist.github.com/jordandukart/b602fa64f50bb14ba579d2a51f0fdee5).  
 
-Copy of description included below.
+Copy of module description also included below.
 
 # dgi Coding Test
 
