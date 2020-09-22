@@ -3,54 +3,55 @@
 Drupal 7 custom 'registration' module for the dgi coding test.
 
 This is my implementation of the coding test as described in the [dgi Coding Test](https://gist.github.com/jordandukart/b602fa64f50bb14ba579d2a51f0fdee5),
-which involves creating a custom Drupal 7 module that allows students to 
+which involves creating a custom Drupal 7 module that allows students to
 register in a course.  It includes:
 
-- A database with a 'registration' table managed by the Drupal back end. 
+- A database with a 'registration' table managed by the Drupal back end.
 
 - A page with a form for adding student registrations which stores
-them in the 'registration' table on submission.  The form is implemented using  
+them in the 'registration' table on submission.  The form is implemented using
 the Drupal Forms API.
 
-- Limited access to the registration form page to authenticated users.  
+- Limited access to the registration form page to authenticated users.
 
 - A block that calculates the number of students signed up and displays it in
 the content region of the <front> page only.
 
-- A drush command to list the students signed up for the course. 
+- A drush command to list the students signed up for the course.
 
 ## Installation
 
-This is a Drupal 7 module is called 'registration'.  It can be installed 
-like any other Drupal 7 module.  Move the code to the 
-{site_root}/sites/all/modules directory.  Go to the modules page and 
-enable the 'registration' module in the 'custom-modules' package. 
-This creates the 'registration' table in the site's database. 
+This is a Drupal 7 module is called 'registration'.  It can be installed
+like any other Drupal 7 module.  Move the code to the
+{site_root}/sites/all/modules directory.  Go to the modules page and
+enable the 'registration' module in the 'custom-modules' package.
+This creates the 'registration' table in the site's database.
 
 ## Registration Form
 
-The page can be reached by either using the 'Course Registration' 
+The page can be reached by either using the 'Course Registration'
 link in the 'Navigation' menu, or by going to /registration.
-Simply fill out the form and press the 'Register' button to register. 
-It should report a successful registration which can be seen as 
+Simply fill out the form and press the 'Register' button to register.
+It should report a successful registration which can be seen as
 an entry in the database table.
 
-The link in the 'Navigation' menu can be disabled or moved to another menu 
+The link in the 'Navigation' menu can be disabled or moved to another menu
 using the Drupal 7 Menu UI (at admin/structure/menu).
 
 ## Registration Access
 
-Access to the registration form is set to 'Authenticated User' by default. 
+Access to the registration form is set to 'Authenticated User' by default.
 It can be managed in the Drupal 7 Permissions UI (at /admin/people/permissions).
 
 ## Registration Block
 
 A block appears in the content region of the <front-page> only by default.
-However, this may be managed by configuring the block in the Drupal Blocks UI (admin/stuctur/blocks).
+However, this may be managed by configuring the block in the Drupal Blocks UI
+(admin/stucture/blocks).
 
 ## Drush command
 
-The Drush command that will print a list of registered students is:  
+The Drush command that will print a list of registered students is:
 
 ```
 drush reg-student-list
@@ -69,14 +70,13 @@ Run this command from the site root directory.
 This module has been scanned using phpcs to assure adherence to Drupal 7
 coding standards using the following command.
 
-This module complies to Drupal [coding standards](https://www.drupal.org/docs/develop/standards/coding-standards) 
-and naming conventions using [PHPCS and Drupal's 
+This module complies to Drupal [coding standards](https://www.drupal.org/docs/develop/standards/coding-standards)
+and naming conventions using [PHPCS and Drupal's
 sniffs](https://www.drupal.org/node/1419988).
 
 
 ## Styling
 
-This module has minimal styling and works well with the base 'Bartik' theme. 
-However, the style may be customized by adding CSS/SASS/LESS to your custom 
+This module has minimal styling and works well with the base 'Bartik' theme.
+However, the style may be customized by adding CSS/SASS/LESS to your custom
 theme.
-
