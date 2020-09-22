@@ -28,7 +28,6 @@ function registration_drush_command() {
  *
  * Drush_[MODULE_NAME]_[COMMAND_NAME]().
  */
-
 function drush_registration_reg_student_list() {
   $reg_list = drush_registration_get_list();
 
