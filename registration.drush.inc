@@ -31,21 +31,22 @@ function registration_drush_command() {
 function drush_registration_reg_student_list() {
   $reg_list = drush_registration_get_list();
 
+  drush_print(dt(''));
+  drush_print(dt('**STUDENTS REGISTERED - ' . REGISTRATION_COURSE_TITLE));
+  drush_print(dt(''));
+
   if (!empty($reg_list)) {
-    drush_print(dt(''));
-    drush_print(dt('**STUDENTS REGISTERED - ' . REGISTRATION_COURSE_TITLE));
-    drush_print(dt(''));
 
     foreach ($reg_list as $reg) {
       drush_print(dt('@last, @first',
         ['@last' => $reg['surname'], '@first' => $reg['name']])
       );
     }
-    drush_print(dt(''));
   }
   else {
     drush_print(dt('No students have registered yet.'));
   }
+  drush_print(dt(''));
 }
 
 /**
