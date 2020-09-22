@@ -74,7 +74,7 @@ and naming conventions using [PHPCS and Drupal's
 sniffs](https://www.drupal.org/node/1419988).
 
 
-## STYLING
+## Styling
 
 This module has minimal styling and works well with the base 'Bartik' theme. 
 However, the style may be customized by adding CSS/SASS/LESS to your custom 
