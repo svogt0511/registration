@@ -28,12 +28,13 @@ function registration_drush_command() {
  *
  * Drush_[MODULE_NAME]_[COMMAND_NAME]().
  */
+
 function drush_registration_reg_student_list() {
   $reg_list = drush_registration_get_list();
 
   if (!empty($reg_list)) {
     drush_print(dt(''));
-    drush_print(dt('STUDENTS REGISTERED - ' . REGISTRATION_COURSE_TITLE));
+    drush_print(dt('**STUDENTS REGISTERED - ' . REGISTRATION_COURSE_TITLE));
     drush_print(dt(''));
 
     foreach ($reg_list as $reg) {
