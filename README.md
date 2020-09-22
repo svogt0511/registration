@@ -1,4 +1,5 @@
 # Drupal 7 Custom Module: registration
+
 Drupal 7 custom 'registration' module for the dgi coding test.
 
 This is my implementation of the coding test as described in the [dgi Coding Test](https://gist.github.com/jordandukart/b602fa64f50bb14ba579d2a51f0fdee5),
@@ -44,7 +45,7 @@ It can be managed in the Drupal 7 Permissions UI (at /admin/people/permissions).
 
 ## Registration Block
 
-A block appears in the content region of the <front-page> only.
+A block appears in the content region of the <front-page> only by default.
 However, this may be managed by configuring the block in the Drupal Blocks UI (admin/stuctur/blocks).
 
 ## Drush command
@@ -68,8 +69,14 @@ Run this command from the site root directory.
 This module has been scanned using phpcs to assure adherence to Drupal 7
 coding standards using the following command.
 
-```
-phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,css,info,txt,md,yml sites/all/modules/registration
+This module complies to Drupal [coding standards](https://www.drupal.org/docs/develop/standards/coding-standards) 
+and naming conventions using [PHPCS and Drupal's 
+sniffs](https://www.drupal.org/node/1419988).
 
-```
+
+## STYLING
+
+This module has minimal styling and works well with the base 'Bartik' theme. 
+However, the style may be customized by adding CSS/SASS/LESS to your custom 
+theme.
 
