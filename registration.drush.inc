@@ -36,6 +36,15 @@ function drush_registration_reg_student_list() {
   drush_print(dt(''));
 
   if (!empty($reg_list)) {
+    // Sort alphabetically, ascending.  Sort by last name first,
+    // then by first name.
+    uasort($reg_list, function ($a, $b) {
+      $i = strnatcasecmp($a['surname'], $b['surname']);
+      if ($i == 0) {
+        $i = strnatcasecmp($a['name'], $b['name']);
+      }
+      return $i;
+    });
 
     foreach ($reg_list as $reg) {
       drush_print(dt('@last, @first',
