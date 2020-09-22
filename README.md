@@ -8,13 +8,13 @@ register in a course.  It includes:
 - A database with a 'registration' table managed by the Drupal back end. 
 
 - A page with a form for adding student registrations which stores
-them in the 'registration' table on submission.  The form is implemented using the 
-Drupal Forms API.
+them in the 'registration' table on submission.  The form is implemented using  
+the Drupal Forms API.
 
 - Limited access to the registration form page to authenticated users.  
 
-- A block that calculates the number of students signed up and displays it in the
-content region of the <front> page only.
+- A block that calculates the number of students signed up and displays it in
+the content region of the <front> page only.
 
 - A drush command to list the students signed up for the course. 
 
@@ -34,18 +34,20 @@ Simply fill out the form and press the 'Register' button to register.
 It should report a successful registration which can be seen as 
 an entry in the database table.
 
-The link in the 'Navigation' menu can be disabled or moved to another menu using the Drupal 7 Menu UI (at admin/structure/menu).
+The link in the 'Navigation' menu can be disabled or moved to another menu 
+using the Drupal 7 Menu UI (at admin/structure/menu).
 
 ## Registration Access
 
-Access to the registration form is set to 'Authenticated User' by default.  It can be managed in the Drupal 7 Permissions UI (at /admin/people/permissions).
+Access to the registration form is set to 'Authenticated User' by default. 
+It can be managed in the Drupal 7 Permissions UI (at /admin/people/permissions).
 
 ## Registration Block
 
 A block appears in the content region of the <front-page> only.
 However, this may be managed by configuring the block in the Drupal Blocks UI (admin/stuctur/blocks).
 
-## Drupal command
+## Drush command
 
 The Drush command that will print a list of registered students is:  
 
@@ -58,3 +60,16 @@ abbreviated as:
 ```
 drush rsl
 ```
+
+Run this command from the site root directory.
+
+## Drupal Coding Standards
+
+This module has been scanned using phpcs to assure adherence to Drupal 7
+coding standards using the following command.
+
+```
+phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,css,info,txt,md,yml sites/all/modules/registration
+
+```
+
