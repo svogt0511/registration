@@ -9,22 +9,14 @@
  * Implements hook_drush_command().
  */
 function registration_drush_command() {
-
-  $commands['my-example-command'] = array(
-    'callback' => 'registration_my_example_command',
-    'description' => 'This is my example command.',
-    'aliases' => array('mec'),
-    'arguments' => array(
-      'arg1' => 'My custom argument 1.',
-      'arg2' => 'My custom argument 2.',
-    ),
-    'options' => array(
-      'opt1' => 'My custom option.',
-    ),
+  $commands['reg-student-list'] = array(
+    'callback' => 'drush_registration_reg_student_list',
+    'description' => 'Get a list of students signed up for this course.',
+    'aliases' => array('rsl'),
+    'arguments' => array(),
+    'options' => array(),
     'examples' => array(
-      'drush mec' => 'Print my example command.',
-      'drush mec myargument' => 'Print my example command with an argument "myargument".',
-      'drush mec myargument --opt1=myoption' => 'Print my example command with an argument "myargument" and an option "myoption".',
+      'drush rsl' => 'Print a list of students registered for a given class.',
     ),
   );
 
@@ -33,22 +25,22 @@ function registration_drush_command() {
 
 /**
  * Drush command logic.
+ *
+ * Drush_[MODULE_NAME]_[COMMAND_NAME]().
  */
-function registration_my_example_command($arg1 = 'N/A', $arg2 = 'N/A') {
-  $opt1 = drush_get_option('opt1', 'N/A');
-  $tokens = array('@arg1' => $arg1, '@opt1' => $opt1);
-
-  $header = array(dt('ID'), dt('UID'), dt('NAME'), dt('SURNAME'), dt('AGE'));
-  $widths = array('pid' => 5, 'uid' => 20, 'name' => 30, 'surname' => 25);
-
-  $reg_list = registration_drush_registration_list();
+function drush_registration_reg_student_list() {
+  $reg_list = drush_registration_get_list();
 
   if (!empty($reg_list)) {
-    array_unshift($reg_list, $header);
-    $output = drush_format_table($reg_list, TRUE, $widths);
     drush_print(dt(''));
-    drush_print(dt('STUDENTS REGISTERED'));
-    drush_print($output);
+    drush_print(dt('STUDENTS REGISTERED - ' . REGISTRATION_COURSE_TITLE));
+    drush_print(dt(''));
+
+    foreach ($reg_list as $reg) {
+      drush_print(dt('@last, @first',
+        ['@last' => $reg['surname'], '@first' => $reg['name']])
+      );
+    }
     drush_print(dt(''));
   }
   else {
@@ -59,11 +51,11 @@ function registration_my_example_command($arg1 = 'N/A', $arg2 = 'N/A') {
 /**
  * Gets list from db 'registration' table for output by drush command.
  */
-function registration_drush_registration_list() {
+function drush_registration_get_list() {
   $rows = array();
 
   // Get all entries in the registration table.
-  if ($entries = registration_entry_load()) {
+  if ($entries = registration_selective_list(array('surname', 'name'))) {
     $rows = array();
     foreach ($entries as $entry) {
       // Sanitize the data before handing it off to the theme layer.

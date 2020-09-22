@@ -1,7 +1,7 @@
 # Drupal 7 Custom Module: registration
-Drupal 7 custom 'registration' module for the dgi coding test.  
+Drupal 7 custom 'registration' module for the dgi coding test.
 
-Coding test as described in the [dgi Coding Test](https://gist.github.com/jordandukart/b602fa64f50bb14ba579d2a51f0fdee5).  
+Coding test as described in the [dgi Coding Test](https://gist.github.com/jordandukart/b602fa64f50bb14ba579d2a51f0fdee5).
 
 Copy of module description also included below.
 
@@ -9,17 +9,24 @@ Copy of module description also included below.
 
 ## Story
 
-The University of Prince Edward Island is gauging interest for a new summer course, "Theory of Computing 2: Electric Boogaloo". To determine whether or not they have enough students willing to sign up they require the following in a new Drupal 7 module:
+The University of Prince Edward Island is gauging interest for a new
+summer course, "Theory of Computing 2: Electric Boogaloo".
+To determine whether or not they have enough students willing to
+sign up they require the following in a new Drupal 7 module:
 
-* A page that allows a student to sign up for the course and stores the information.
- 
-* A block that calculates the amount of students currently signed up and displays it on the main page.
+* A page that allows a student to sign up for the course and stores
+the information.
+
+* A block that calculates the amount of students currently signed up and
+displays it on the main page.
 
 * Ability on the command line to generate a list of all signed up students.
 
 ## Technical Requirements
 
-* Uses a database table managed within Drupal as the backend for storing and retrieval of the students' information (this table gets created when the module is enabled).
+* Uses a database table managed within Drupal as the backend for storing and
+retrieval of the students' information (this table gets created when the
+module is enabled).
 
 * Form is created with the [Drupal Form API](https://api.drupal.org/api/drupal/includes%21form.inc/group/form_api/7.x) and is only accessible to logged in users.
 
@@ -33,6 +40,7 @@ The University of Prince Edward Island is gauging interest for a new summer cour
 
 * Complying to Drupal [coding standards](https://www.drupal.org/docs/develop/standards/coding-standards) and naming conventions using [PHPCS and Drupal's sniffs](https://www.drupal.org/node/1419988) would be preferred.
 
-* Submission of the module only via a Git repository or in an archive would be preferred.
+* Submission of the module only via a Git repository or in an archive
+would be preferred.
 
 * A good resource would be the Drupal [Examples](https://www.drupal.org/project/examples) module.

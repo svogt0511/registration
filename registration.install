@@ -6,36 +6,6 @@
  */
 
 /**
- * Implements hook_install().
- *
- * @see hook_install()
- *
- * @ingroup registration
- */
-function registration_install() {
-  // Add a default entry.
-  $fields = array(
-    'name'    => 'John',
-    'surname' => 'Doe',
-    'age'     => 0,
-  );
-  db_insert('registration')
-    ->fields($fields)
-    ->execute();
-
-  // Add another entry.
-  $fields = array(
-    'name'    => 'John',
-    'surname' => 'Roe',
-    'age'     => 100,
-    'uid'     => 1,
-  );
-  db_insert('registration')
-    ->fields($fields)
-    ->execute();
-}
-
-/**
  * Implements hook_schema().
  *
  * Defines the database tables used by this module.
@@ -43,7 +13,6 @@ function registration_install() {
  * the @link http://drupal.org/project/schema schema module @endlink.
  *
  * @see hook_schema()
- * @ingroup dbtng_example
  */
 function registration_schema() {
 
@@ -54,12 +23,6 @@ function registration_schema() {
         'type' => 'serial',
         'not null' => TRUE,
         'description' => 'Primary Key: Unique person ID.',
-      ),
-      'uid' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => "Creator user's {users}.uid",
       ),
       'name' => array(
         'type' => 'varchar',
@@ -75,19 +38,11 @@ function registration_schema() {
         'default' => '',
         'description' => 'Surname of the student.',
       ),
-      'age' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'size' => 'tiny',
-        'description' => 'The age of the student in years.',
-      ),
     ),
     'primary key' => array('pid'),
     'indexes' => array(
       'name'    => array('name'),
       'surname' => array('surname'),
-      'age'     => array('age'),
     ),
   );
 
@@ -97,19 +52,9 @@ function registration_schema() {
 /**
  * Implements hook_enable().
  *
- * @ingroup block_example
+ * Sets permission to register for course to 'authenticated user'.
  */
 function registration_enable() {
   $permissions = array('register for course' => TRUE);
   user_role_change_permissions(DRUPAL_AUTHENTICATED_RID, $permissions);
-  // user_role_change_permissions(2, $permissions);.
-}
-
-/**
- * Implements hook_uninstall().
- *
- * @ingroup block_example
- */
-function registration_uninstall() {
-  variable_del('registration_block_string');
 }
