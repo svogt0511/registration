@@ -1,46 +1,55 @@
 # Drupal 7 Custom Module: registration
 Drupal 7 custom 'registration' module for the dgi coding test.
 
-Coding test as described in the [dgi Coding Test](https://gist.github.com/jordandukart/b602fa64f50bb14ba579d2a51f0fdee5).
+This is my implementation of the coding test as described in the [dgi Coding Test](https://gist.github.com/jordandukart/b602fa64f50bb14ba579d2a51f0fdee5), which involves creating a custom Drupal 7 module that allows students to register in a course.  It includes:
 
-Copy of module description also included below.
+- A database with a 'registration' table managed by the Drupal back end. 
 
-# dgi Coding Test
+- A page with a form for adding student registrations which stores
+them in the 'registration' table on submission.  The form is implemented using the 
+Drupal Forms API and
 
-## Story
+- Limited access to the form page to authenticated users.  
 
-The University of Prince Edward Island is gauging interest for a new
-summer course, "Theory of Computing 2: Electric Boogaloo".
-To determine whether or not they have enough students willing to
-sign up they require the following in a new Drupal 7 module:
+- A block that calculates the number of students signed up and displays it in the
+content region of the <front> page only.
 
-* A page that allows a student to sign up for the course and stores
-the information.
+- A drush command to list the students signed up for the course. 
 
-* A block that calculates the amount of students currently signed up and
-displays it on the main page.
+## Installation
 
-* Ability on the command line to generate a list of all signed up students.
+This is a Drupal 7 module is called 'registration'.  It can be installed 
+like any other Drupal 7 module.  Move the code to the 
+{site_root}/sites/all/modules directory.  Go to the modules page and 
+enable the 'registration' module in the 'custom-modules' package. 
+This creates the 'registration' table in the site's database. 
 
-## Technical Requirements
+## Registration Form
 
-* Uses a database table managed within Drupal as the backend for storing and
-retrieval of the students' information (this table gets created when the
-module is enabled).
+The page can be reached by either using the 'Course Registration' 
+link in the 'Navigation' menu, or by going to /registration.
+Simply fill out the form and press the 'Register' button to register. 
+It should report a successful registration which can be seen as 
+an entry in the database table.
 
-* Form is created with the [Drupal Form API](https://api.drupal.org/api/drupal/includes%21form.inc/group/form_api/7.x) and is only accessible to logged in users.
+The link in the 'Navigation' menu can be disabled or moved to another menu using the Drupal 7 Menu UI (at admin/structure/menu).
 
-* [Block](https://www.drupal.org/docs/7/core/modules/block/overview) that is created placed in the "content" region of the page on the frontpage (`<front>`) only. If the user is not signed up, and not anonymous, a link to the sign up page should also be present underneath.
+## Registration Access
 
-* Uses a [Drush](https://www.drush.org/) command implementation in the module to generate the list of students.
+Access to the registration form is set to 'Authenticated User' by default.  It can be managed in the Drupal 7 Permissions UI (at /admin/people/permissions).
 
-## Implementation & Notes
+## Registration Block
 
-* To install Drupal feel free to setup a LAMP/WAMP stack or use something like [Acquia's Dev Desktop](https://dev.acquia.com/downloads) or [drupal-vm](https://github.com/geerlingguy/drupal-vm) that'll provide a quick and easy setup. NOTE: This should be done in Drupal 7 for the purpose of this coding test.
+## Drupal command
 
-* Complying to Drupal [coding standards](https://www.drupal.org/docs/develop/standards/coding-standards) and naming conventions using [PHPCS and Drupal's sniffs](https://www.drupal.org/node/1419988) would be preferred.
+The Drush command that will print a list of registered students is:  
 
-* Submission of the module only via a Git repository or in an archive
-would be preferred.
+```
+drush reg-student-list
+```
 
-* A good resource would be the Drupal [Examples](https://www.drupal.org/project/examples) module.
+abbreviated as:
+
+```
+drush rsl
+```
